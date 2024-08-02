@@ -1,0 +1,20 @@
+.homepage-info__wrapper {
+  animation: appearing 3s ease;
+  animation-iteration-count: 1;
+  overflow: hidden;
+  will-change: opacity;
+}
+
+.homepage-info__wrapper > p {
+  font-weight: 500;
+  font-size: 24px;
+}
+
+@keyframes appearing {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

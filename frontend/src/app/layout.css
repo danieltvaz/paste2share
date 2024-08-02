@@ -5,3 +5,8 @@ body {
   flex-direction: column;
   justify-content: space-between;
 }
+
+main {
+  display: flex;
+  flex: 2;
+}
