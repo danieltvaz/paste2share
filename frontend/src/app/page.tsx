@@ -2,19 +2,20 @@
 
 import Button from "../components/client/button";
 import HomepageInfo from "@/components/server/homepage-info";
-import { socket } from "../services/socket/socket";
+import SocketHandler from "../services/socket/socket";
 import { useRouter } from "next/navigation";
 
 export default function Home() {
   const router = useRouter();
 
   async function startNewConnection() {
-    socket.connect();
-    socket.on("connectionId", (id: any) => {
-      router.push(`/paste/${id}`);
+    const newSocket = new SocketHandler();
+    newSocket.newConnection((namespace) => {
+     router.push(`/paste/${namespace}`);
     });
+    
   }
-
+  
   return (
     <section className="flex grow flex-col justify-center gap-4 items-center">
       <HomepageInfo />
