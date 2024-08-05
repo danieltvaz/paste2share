@@ -18,7 +18,6 @@ export class WebsocketGateway implements OnGatewayConnection {
   server: Server;
 
   private onNewMessage(body: any, client: Socket) {
-    console.log(`Received message on dynamic event: ${body}`);
     this.namespaces[this.randomId].emit('message', {
       from: client.id,
       message: body,
@@ -31,10 +30,10 @@ export class WebsocketGateway implements OnGatewayConnection {
 
       this.namespaces[this.randomId] = newNamespace;
 
-      newNamespace.on('connection', (namespaceClient: Socket) => {
+      newNamespace.on('connection', async (namespaceClient: Socket) => {
         console.log('Client connected to namespace:', newNamespace.name);
 
-        newNamespace.emit('new-user', namespaceClient.id);
+        await this.updateClientsList(newNamespace);
 
         namespaceClient.on('message', (body: any) => {
           this.onNewMessage(body, namespaceClient);
@@ -48,5 +47,11 @@ export class WebsocketGateway implements OnGatewayConnection {
 
     // Envie o ID de conexão para o cliente
     client.emit('connectionId', this.randomId);
+  }
+
+  private async updateClientsList(namespace: Namespace) {
+    const sockets = await namespace.fetchSockets();
+    const clients = sockets.map((socket) => socket.id);
+    namespace.emit('new-user', clients);
   }
 }

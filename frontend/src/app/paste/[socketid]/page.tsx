@@ -3,6 +3,7 @@
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 
 import Button from "@/components/client/button";
+import React from "react";
 import SocketHandler from "@/services/socket/socket";
 import TextArea from "@/components/client/text-area";
 import { useRouter as navigationRouter } from "next/navigation";
@@ -11,7 +12,9 @@ export default function Home() {
   const router = navigationRouter();
   const socketRef = useRef(new SocketHandler());
   const [inputValue, setInputValue] = useState("");
-  const [connectedUsers, setConnectedUsers] = useState<{ id: string; connectionTime: string }[] | null>(null);
+  const [connectedUsers, setConnectedUsers] = useState<string[]>([]);
+  const clientSocketid = socketRef.current.socketInstance?.id;
+  const namespaceAdmin = connectedUsers[0];
 
   useEffect(() => {
     const path = window.location.pathname.split("/")[2];
@@ -22,8 +25,13 @@ export default function Home() {
       setInputValue(message.message);
     });
 
-    socketRef.current.socketInstance?.on("new-user", (userId: string) => {
-      setConnectedUsers((prev) => prev && [...prev, { id: userId, connectionTime: new Date().toLocaleDateString() }]);
+    socketRef.current.socketInstance?.on("new-user", (userId: string[]) => {
+      setConnectedUsers(() => {
+        const uniqueUsersIds = new Set([...userId]);
+        return [...uniqueUsersIds];
+      });
+
+      sendMessageToSync();
     });
 
     return () => {
@@ -41,24 +49,30 @@ export default function Home() {
   }
 
   function disconnect() {
+    socketRef.current.disconnect();
     router.replace(window.location.protocol + "//" + window.location.host);
   }
 
-  function sendMessageToSync() {}
-
-  useEffect(() => {
-    console.log(connectedUsers);
-  }, [connectedUsers]);
+  function sendMessageToSync() {
+    console.log(socketRef.current.socketInstance?.id);
+    if (connectedUsers[0] === socketRef.current.socketInstance?.id) {
+      socketRef.current.socketInstance?.emit("message", inputValue);
+    }
+  }
 
   return (
     <section className="flex flex-col items-center gap-4">
       <TextArea onChange={handleChange} value={inputValue} />
-      <div className="flex flex-col" style={{ border: "1px solid red" }}>
-        {connectedUsers?.map((user) => (
-          <>
-            <p>{user.id}</p>
-            <p>{user.connectionTime}</p>
-          </>
+      <div className="flex flex-col text-center">
+        <p className="font-bold">Connected users</p>
+        {connectedUsers?.map((userId, index) => (
+          <React.Fragment key={index}>
+            <p>
+              {`${userId} - 
+            ${userId === namespaceAdmin ? "(Admin)" : "(Guest)"} 
+            ${clientSocketid === userId ? "- You" : ""}`}
+            </p>
+          </React.Fragment>
         ))}
       </div>
       <div className="flex gap-2">
