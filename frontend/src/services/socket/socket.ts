@@ -6,6 +6,10 @@ export default class SocketHandler {
   private BASE_URL = "http://192.168.68.108:3001";
   public socketInstance: Socket | undefined;
 
+  constructor() {
+    this.socketInstance = undefined;
+  }
+
   newConnection(callback: (...args: any) => any) {
     this.socketInstance = io(this.BASE_URL, {
       transports: ["websocket"],
