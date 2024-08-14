@@ -6,6 +6,7 @@ import Button from "@/components/client/button";
 import React from "react";
 import SocketHandler from "@/services/socket/socket";
 import TextArea from "@/components/client/text-area";
+import { debounce } from "@/helpers/debounce";
 import { useRouter as navigationRouter } from "next/navigation";
 
 export default function Home() {
@@ -22,7 +23,7 @@ export default function Home() {
     socketRef.current.connect(path);
 
     socketRef.current.socketInstance?.on("message", (message: { message: string; from: string }) => {
-      setInputValue(message.message);
+      receiveMessage(message);
     });
 
     socketRef.current.socketInstance?.on("new-user", (userId: string[]) => {
@@ -30,8 +31,6 @@ export default function Home() {
         const uniqueUsersIds = new Set([...userId]);
         return [...uniqueUsersIds];
       });
-
-      sendMessageToSync();
     });
 
     return () => {
@@ -39,8 +38,11 @@ export default function Home() {
     };
   }, []);
 
+  useEffect(() => {
+    sendMessage();
+  }, [inputValue]);
+
   function handleChange(event: ChangeEvent<HTMLTextAreaElement>) {
-    socketRef.current.socketInstance?.emit("message", event.target.value);
     setInputValue(event.target.value);
   }
 
@@ -53,15 +55,18 @@ export default function Home() {
     router.replace(window.location.protocol + "//" + window.location.host);
   }
 
-  function sendMessageToSync() {
-    console.log(socketRef.current.socketInstance?.id);
-    if (connectedUsers[0] === socketRef.current.socketInstance?.id) {
-      socketRef.current.socketInstance?.emit("message", inputValue);
+  const sendMessage = debounce(() => {
+    socketRef.current.socketInstance?.emit("message", inputValue);
+  }, 1000);
+
+  const receiveMessage = debounce((message: { message: string; from: string }) => {
+    if (clientSocketid !== message.from) {
+      setInputValue(message.message);
     }
-  }
+  }, 1000);
 
   return (
-    <section className="flex flex-col items-center gap-4">
+    <section className="flex flex-col items-center gap-4 ">
       <TextArea onChange={handleChange} value={inputValue} />
       <div className="flex flex-col text-center">
         <p className="font-bold">Connected users</p>
