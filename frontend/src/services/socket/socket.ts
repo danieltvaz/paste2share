@@ -3,7 +3,7 @@ import { Socket, io } from "socket.io-client";
 // "undefined" means the URL will be computed from the `window.location` object
 
 export default class SocketHandler {
-  private BASE_URL = "http://192.168.68.108:3001";
+  private BASE_URL = process.env.NEXT_PUBLIC_API_URL;
   public socketInstance: Socket | undefined;
 
   constructor() {
