@@ -16,11 +16,9 @@ export default class SocketHandler {
     });
 
     this.socketInstance?.on("connectionId", (newNamespace: string) => {
-      this.socketInstance = io(this.BASE_URL + "/" + newNamespace, {
-        transports: ["websocket"],
-      });
+      this.socketInstance?.disconnect();
+
       callback(newNamespace);
-      this.socketInstance.disconnect();
     });
   }
 
