@@ -85,7 +85,7 @@ export default function Home() {
           Copy link to clipboard
         </Button>
         <Button variant="red" onClick={disconnect}>
-          Close this share (forever)
+          Quit
         </Button>
       </div>
     </section>
