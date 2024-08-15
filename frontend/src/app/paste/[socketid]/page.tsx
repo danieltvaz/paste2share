@@ -2,6 +2,7 @@
 
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 
+import AdsenseBanner from "@/components/client/adsense-banner";
 import Button from "@/components/client/button";
 import React from "react";
 import SocketHandler from "@/services/socket/socket";
@@ -66,28 +67,36 @@ export default function Home() {
   }, 1000);
 
   return (
-    <section className="flex flex-col items-center gap-4 ">
-      <TextArea onChange={handleChange} value={inputValue} />
-      <div className="flex flex-col text-center">
-        <p className="font-bold">Connected users</p>
-        {connectedUsers?.map((userId, index) => (
-          <React.Fragment key={index}>
-            <p>
-              {`${userId} - 
+    <>
+      <section className="flex flex-col items-center gap-4 ">
+        <TextArea onChange={handleChange} value={inputValue} />
+        <div className="flex flex-col text-center">
+          <p className="font-bold">Connected users</p>
+          {connectedUsers?.map((userId, index) => (
+            <React.Fragment key={index}>
+              <p>
+                {`${userId} - 
             ${userId === namespaceAdmin ? "(Admin)" : "(Guest)"} 
             ${clientSocketid === userId ? "- You" : ""}`}
-            </p>
-          </React.Fragment>
-        ))}
-      </div>
-      <div className="flex gap-2">
-        <Button variant="blue" onClick={copyToClipboard}>
-          Copy link to clipboard
-        </Button>
-        <Button variant="red" onClick={disconnect}>
-          Quit
-        </Button>
-      </div>
-    </section>
+              </p>
+            </React.Fragment>
+          ))}
+        </div>
+        <div className="flex gap-2">
+          <Button variant="blue" onClick={copyToClipboard}>
+            Copy link to clipboard
+          </Button>
+          <Button variant="red" onClick={disconnect}>
+            Quit
+          </Button>
+        </div>
+      </section>
+      <AdsenseBanner
+        data-ad-client={process.env.NEXT_PUBLIC_GOOGLE_ADS_CLIENT_ID}
+        data-ad-slot="4203866364"
+        data-ad-format="auto"
+        data-full-width-responsive="true"
+      />
+    </>
   );
 }

@@ -1,6 +1,7 @@
 import "./globals.css";
 import "./layout.css";
 
+import AdsenseScript from "@/components/client/adsense-script";
 import Footer from "../components/server/footer";
 import Header from "../components/server/header";
 import type { Metadata } from "next";
@@ -17,6 +18,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <AdsenseScript />
+      </head>
       <body>
         <Header />
         <main>{children}</main>
