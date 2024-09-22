@@ -17,14 +17,28 @@ export default function Home() {
   const [connectedUsers, setConnectedUsers] = useState<string[]>([]);
   const clientSocketid = socketRef.current.socketInstance?.id;
   const namespaceAdmin = connectedUsers[0];
+  const [namespaceId, setNamespaceId] = useState("");
+
+  const sendMessage = debounce(() => {
+    socketRef.current.socketInstance?.emit("message", { message: inputValue, namespaceId: namespaceId });
+  }, 1000);
+
+  const receiveMessage = useRef(
+    debounce((message: { message: string; from: string }) => {
+      if (clientSocketid !== message.from) {
+        setInputValue(message.message);
+      }
+    }, 1000)
+  );
 
   useEffect(() => {
-    const path = window.location.pathname.split("/")[2];
+    const url = window?.location.pathname.split("/")[2];
+    setNamespaceId(url);
 
-    socketRef.current.connect(path);
+    socketRef.current.connect(url);
 
     socketRef.current.socketInstance?.on("message", (message: { message: string; from: string }) => {
-      receiveMessage(message);
+      receiveMessage.current(message);
     });
 
     socketRef.current.socketInstance?.on("new-user", (userId: string[]) => {
@@ -55,16 +69,6 @@ export default function Home() {
     socketRef.current.disconnect();
     router.replace(window.location.protocol + "//" + window.location.host);
   }
-
-  const sendMessage = debounce(() => {
-    socketRef.current.socketInstance?.emit("message", inputValue);
-  }, 1000);
-
-  const receiveMessage = debounce((message: { message: string; from: string }) => {
-    if (clientSocketid !== message.from) {
-      setInputValue(message.message);
-    }
-  }, 1000);
 
   return (
     <>
