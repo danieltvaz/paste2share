@@ -5,48 +5,52 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 
+import { generateRandomId } from 'src/utils';
+
+interface INewMessageBody {
+  message: string;
+  namespaceId: string;
+}
+
 @WebSocketGateway()
 export class WebsocketGateway implements OnGatewayConnection {
-  private randomId: string;
-  private namespaces: Record<string, Namespace> = {};
-
-  constructor() {
-    this.randomId = Math.random().toString(36).substring(7);
-  }
+  constructor() {}
 
   @WebSocketServer()
   server: Server;
 
-  private onNewMessage(body: any, client: Socket) {
-    this.namespaces[this.randomId].emit('message', {
+  private onNewMessage(payload: INewMessageBody, client: Socket) {
+    const namespace = this.server.of(`/${payload.namespaceId}`);
+
+    console.log(payload);
+
+    namespace.emit('message', {
       from: client.id,
-      message: body,
+      message: payload.message,
     });
   }
 
   handleConnection(client: Socket) {
-    if (!this.namespaces[this.randomId]) {
-      const newNamespace = this.server.of(`/${this.randomId}`);
+    const newRandomId = generateRandomId();
 
-      this.namespaces[this.randomId] = newNamespace;
+    const newNamespace = this.server.of(`/${newRandomId}`);
 
-      newNamespace.on('connection', async (namespaceClient: Socket) => {
-        console.log('Client connected to namespace:', newNamespace.name);
+    newNamespace.on('connection', async (namespaceClient: Socket) => {
+      console.log('Client connected to namespace:', newNamespace.name);
 
-        await this.updateClientsList(newNamespace);
+      await this.updateClientsList(newNamespace);
 
-        namespaceClient.on('message', (body: any) => {
-          this.onNewMessage(body, namespaceClient);
-        });
-
-        namespaceClient.on('disconnect', () => {
-          console.log('Client disconnected from namespace:', newNamespace.name);
-        });
+      namespaceClient.on('message', (body: any) => {
+        this.onNewMessage(body, namespaceClient);
       });
-    }
+
+      namespaceClient.on('disconnect', () => {
+        console.log('Client disconnected from namespace:', newNamespace.name);
+      });
+    });
 
     // Envie o ID de conexão para o cliente
-    client.emit('connectionId', this.randomId);
+    client.emit('connectionId', newRandomId);
   }
 
   private async updateClientsList(namespace: Namespace) {
