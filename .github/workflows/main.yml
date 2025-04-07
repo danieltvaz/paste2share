@@ -1,0 +1,43 @@
+name: deploy-paste2share-ec2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy
+        run: |
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            cd ~/paste2share
+
+            echo "🔄 Atualizando repositório..."
+            git pull origin main
+
+            echo "📦 Instalando dependências do backend..."
+            cd backend
+            npm install
+            npm run build
+            pm2 restart backend || pm2 start dist/main.js --name backend
+            cd ..
+
+            echo "📦 Instalando dependências do frontend..."
+            cd frontend
+            npm install
+            npm run build
+            pm2 restart frontend || pm2 start npm --name frontend -- start
+          EOF
