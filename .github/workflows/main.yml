@@ -32,19 +32,12 @@ jobs:
 
       - name: Archive backend artifacts
         run: |
-          tar czf backend-build.tar.gz \
-            -C backend dist \
-            -C backend package.json \
-            -C backend package-lock.json
+          tar czf backend-build.tar.gz -C backend dist package.json package-lock.json
+
 
       - name: Archive frontend artifacts
         run: |
-          tar czf frontend-build.tar.gz \
-            -C frontend .next \
-            -C frontend public \
-            -C frontend package.json \
-            -C frontend package-lock.json \
-            -C frontend next.config.js
+          tar czf frontend-build.tar.gz -C frontend .next public package.json package-lock.json next.config.js
 
       - name: Setup SSH
         run: |
