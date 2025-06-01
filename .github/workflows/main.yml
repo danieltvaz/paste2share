@@ -30,10 +30,21 @@ jobs:
           npm ci
           npm run build
 
-      - name: Archive build artifacts
+      - name: Archive backend artifacts
         run: |
-          tar czf backend-build.tar.gz -C backend dist
-          tar czf frontend-build.tar.gz -C frontend .next
+          tar czf backend-build.tar.gz \
+            -C backend dist \
+            -C backend package.json \
+            -C backend package-lock.json
+
+      - name: Archive frontend artifacts
+        run: |
+          tar czf frontend-build.tar.gz \
+            -C frontend .next \
+            -C frontend public \
+            -C frontend package.json \
+            -C frontend package-lock.json \
+            -C frontend next.config.js
 
       - name: Setup SSH
         run: |
@@ -44,26 +55,30 @@ jobs:
 
       - name: Copy backend build to EC2
         run: |
-          scp backend-build.tar.gz ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/paste2share/backend/
+          scp backend-build.tar.gz ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/paste2share/
 
       - name: Copy frontend build to EC2
         run: |
-          scp frontend-build.tar.gz ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/paste2share/frontend/
+          scp frontend-build.tar.gz ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/paste2share/
 
-      - name: Deploy build artifacts on EC2 and restart services
+      - name: Deploy on EC2 and restart services
         run: |
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-            cd ~/paste2share/backend
-            tar xzf backend-build.tar.gz
+            set -e
+            cd ~/paste2share
+
+            echo "===> Backend deploy"
+            mkdir -p backend && tar xzf backend-build.tar.gz -C backend
             rm backend-build.tar.gz
+            cd backend
+            npm install --omit=dev
+            pm2 restart paste2share-backend || pm2 start dist/main.js --name paste2share-backend
+            cd ..
 
-            cd ../frontend
-            tar xzf frontend-build.tar.gz
+            echo "===> Frontend deploy"
+            mkdir -p frontend && tar xzf frontend-build.tar.gz -C frontend
             rm frontend-build.tar.gz
-
-            # Restart backend pm2 process (assuming entry point dist/main.js)
-            pm2 restart backend || pm2 start dist/main.js --name paste2share-backend
-
-            # Restart frontend pm2 process (assuming it serves production build)
-            pm2 restart frontend || pm2 start npm --name paste2share-frontend -- start
+            cd frontend
+            npm install --omit=dev
+            pm2 restart paste2share-frontend || pm2 start "npm -- start" --name paste2share-frontend
           EOF
