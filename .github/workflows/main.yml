@@ -62,8 +62,8 @@ jobs:
             rm frontend-build.tar.gz
 
             # Restart backend pm2 process (assuming entry point dist/main.js)
-            pm2 restart backend || pm2 start dist/main.js --name backend
+            pm2 restart backend || pm2 start dist/main.js --name paste2share-backend
 
             # Restart frontend pm2 process (assuming it serves production build)
-            pm2 restart frontend || pm2 start npm --name frontend -- start
+            pm2 restart frontend || pm2 start npm --name paste2share-frontend -- start
           EOF
