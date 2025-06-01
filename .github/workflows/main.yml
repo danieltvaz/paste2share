@@ -74,5 +74,5 @@ jobs:
             cd frontend
             npm install --omit=dev
             pm2 restart paste2share-frontend || pm2 start "npm -- start" --name paste2share-frontend --env production --update-env -- \
-            --NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+            --NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
           EOF
