@@ -11,11 +11,10 @@ export default function Home() {
   async function startNewConnection() {
     const newSocket = new SocketHandler();
     newSocket.newConnection((namespace) => {
-     router.push(`/paste/${namespace}`);
+      router.push(`/paste/${namespace}`);
     });
-    
   }
-  
+
   return (
     <section className="flex grow flex-col justify-center gap-4 items-center">
       <HomepageInfo />

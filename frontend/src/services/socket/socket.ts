@@ -1,13 +1,12 @@
 import { Socket, io } from "socket.io-client";
 
-// "undefined" means the URL will be computed from the `window.location` object
-
 export default class SocketHandler {
   private BASE_URL = process.env.NEXT_PUBLIC_API_URL as string;
   public socketInstance: Socket | undefined;
 
   constructor() {
     this.socketInstance = undefined;
+    console.log(this.BASE_URL);
   }
 
   newConnection(callback: (...args: any) => any) {
