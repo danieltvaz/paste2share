@@ -10,34 +10,60 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: SSH
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
+
+      - name: Install and build backend
+        working-directory: ./backend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Install and build frontend
+        working-directory: ./frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Archive build artifacts
+        run: |
+          tar czf backend-build.tar.gz -C backend dist
+          tar czf frontend-build.tar.gz -C frontend .next
+
+      - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Deploy
+      - name: Copy backend build to EC2
+        run: |
+          scp backend-build.tar.gz ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/paste2share/backend/
+
+      - name: Copy frontend build to EC2
+        run: |
+          scp frontend-build.tar.gz ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/paste2share/frontend/
+
+      - name: Deploy build artifacts on EC2 and restart services
         run: |
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-            cd ~/paste2share
+            cd ~/paste2share/backend
+            tar xzf backend-build.tar.gz
+            rm backend-build.tar.gz
 
-            echo "🔄 Atualizando repositório..."
-            git pull origin main
+            cd ../frontend
+            tar xzf frontend-build.tar.gz
+            rm frontend-build.tar.gz
 
-            echo "📦 Instalando dependências do backend..."
-            cd backend
-            npm install
-            npm run build
+            # Restart backend pm2 process (assuming entry point dist/main.js)
             pm2 restart backend || pm2 start dist/main.js --name backend
-            cd ..
 
-            echo "📦 Instalando dependências do frontend..."
-            cd frontend
-            npm install
-            npm run build
+            # Restart frontend pm2 process (assuming it serves production build)
             pm2 restart frontend || pm2 start npm --name frontend -- start
           EOF
