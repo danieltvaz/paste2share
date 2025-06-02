@@ -25,11 +25,13 @@ jobs:
           npm ci
           npm run build
 
-      - name: Install and build frontend
+      - name: Build frontend with environment variables
         working-directory: ./frontend
         run: |
+          echo "NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL }}" > .env.production
           npm ci
           npm run build
+          rm .env.production
 
       - name: Archive backend artifacts
         run: |
@@ -37,7 +39,7 @@ jobs:
 
       - name: Archive frontend artifacts
         run: |
-          tar czf frontend-build.tar.gz -C frontend .next public package.json package-lock.json next.config.mjs
+          tar czf frontend-build.tar.gz -C frontend .next public package.json package-lock.json next.config.js
 
       - name: Setup SSH
         run: |
@@ -74,8 +76,5 @@ jobs:
             cd frontend
             npm install --omit=dev
 
-            # Write environment variable to .env.production
-            echo "NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL }}" > .env
-
-            pm2 restart paste2share-frontend || pm2 start "npm -- start" --name paste2share-frontend
+            pm2 restart paste2share-frontend || pm2 start "npm start" --name paste2share-frontend
           EOF
