@@ -75,7 +75,7 @@ jobs:
             npm install --omit=dev
 
             # Write environment variable to .env.production
-            echo "NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL }}" > .env.production
+            echo "NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL }}" > .env
 
             pm2 restart paste2share-frontend || pm2 start "npm -- start" --name paste2share-frontend
           EOF
