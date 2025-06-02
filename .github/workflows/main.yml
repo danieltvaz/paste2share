@@ -8,6 +8,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: aws_ec2
 
     steps:
       - name: Checkout code
@@ -55,7 +56,7 @@ jobs:
 
       - name: Deploy on EC2 and restart services
         run: |
-          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << EOF
             set -e
             cd ~/paste2share
 
@@ -72,6 +73,9 @@ jobs:
             rm frontend-build.tar.gz
             cd frontend
             npm install --omit=dev
-            echo "NEXT_PUBLIC_API_URL=${{vars.NEXT_PUBLIC_API_URL}}" >> .env
-            pm2 restart paste2share-frontend || pm2 start "npm -- start" --name paste2share-frontend --env production --update-env
+
+            # Write environment variable to .env.production
+            echo "NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL }}" > .env.production
+
+            pm2 restart paste2share-frontend || pm2 start "npm -- start" --name paste2share-frontend
           EOF
