@@ -6,7 +6,6 @@ export default class SocketHandler {
 
   constructor() {
     this.socketInstance = undefined;
-    console.log(this.BASE_URL);
   }
 
   newConnection(callback: (...args: any) => any) {
