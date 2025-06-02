@@ -34,7 +34,6 @@ jobs:
         run: |
           tar czf backend-build.tar.gz -C backend dist package.json package-lock.json
 
-
       - name: Archive frontend artifacts
         run: |
           tar czf frontend-build.tar.gz -C frontend .next public package.json package-lock.json next.config.mjs
@@ -73,6 +72,6 @@ jobs:
             rm frontend-build.tar.gz
             cd frontend
             npm install --omit=dev
-            export NEXT_PUBLIC_API_URL="${{ vars.NEXT_PUBLIC_API_URL }}"
+            echo "NEXT_PUBLIC_API_URL=${{vars.NEXT_PUBLIC_API_URL}}" >> .env
             pm2 restart paste2share-frontend || pm2 start "npm -- start" --name paste2share-frontend --env production --update-env
           EOF
