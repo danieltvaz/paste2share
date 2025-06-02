@@ -19,12 +19,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* <AdsenseScript /> */}
         <script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4064829886079582"
-          crossOrigin="anonymous"
-        />
+          crossOrigin="anonymous"></script>
       </head>
       <body>
         <Header />
