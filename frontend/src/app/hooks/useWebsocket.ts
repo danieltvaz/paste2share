@@ -18,8 +18,8 @@ export default function useWebsocket() {
     }
   });
 
-  function sendMessage(message?: string) {
-    socketRef.current.socketInstance?.emit("message", { message, namespaceId: namespaceId });
+  function sendMessage() {
+    socketRef.current.socketInstance?.emit("message", { message: inputValue, namespaceId: namespaceId });
   }
 
   function disconnect() {
