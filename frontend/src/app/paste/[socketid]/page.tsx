@@ -1,61 +1,24 @@
 "use client";
 
-import { ChangeEvent, useEffect, useRef, useState } from "react";
+import { ChangeEvent, useEffect } from "react";
 
-import AdsenseBanner from "@/components/client/adsense-banner";
 import Button from "@/components/client/button";
 import React from "react";
-import SocketHandler from "@/services/socket/socket";
 import TextArea from "@/components/client/text-area";
-import { debounce } from "@/helpers/debounce";
 import { useRouter as navigationRouter } from "next/navigation";
+import useWebsocket from "@/app/hooks/useWebsocket";
 
 export default function Home() {
   const router = navigationRouter();
-  const socketRef = useRef(new SocketHandler());
-  const [inputValue, setInputValue] = useState("");
-  const [connectedUsers, setConnectedUsers] = useState<string[]>([]);
-  const clientSocketid = socketRef.current.socketInstance?.id;
-  const namespaceAdmin = connectedUsers[0];
-  const [namespaceId, setNamespaceId] = useState("");
-
-  const sendMessage = debounce(() => {
-    socketRef.current.socketInstance?.emit("message", { message: inputValue, namespaceId: namespaceId });
-  }, 1000);
-
-  const receiveMessage = useRef(
-    debounce((message: { message: string; from: string }) => {
-      if (clientSocketid !== message.from) {
-        setInputValue(message.message);
-      }
-    }, 1000)
-  );
-
-  useEffect(() => {
-    const url = window?.location.pathname.split("/")[2];
-    setNamespaceId(url);
-
-    socketRef.current.connect(url);
-
-    socketRef.current.socketInstance?.on("message", (message: { message: string; from: string }) => {
-      receiveMessage.current(message);
-    });
-
-    socketRef.current.socketInstance?.on("new-user", (userId: string[]) => {
-      setConnectedUsers(() => {
-        const uniqueUsersIds = new Set([...userId]);
-        return [...uniqueUsersIds];
-      });
-    });
-
-    return () => {
-      socketRef.current.disconnect();
-    };
-  }, []);
-
-  useEffect(() => {
-    sendMessage();
-  }, [inputValue]);
+  const {
+    setInputValue,
+    disconnect: disconnectWebsocket,
+    sendMessage,
+    connectedUsers,
+    inputValue,
+    namespaceAdmin,
+    clientSocketid,
+  } = useWebsocket();
 
   function handleChange(event: ChangeEvent<HTMLTextAreaElement>) {
     setInputValue(event.target.value);
@@ -66,9 +29,18 @@ export default function Home() {
   }
 
   function disconnect() {
-    socketRef.current.disconnect();
+    disconnectWebsocket();
     router.replace(window.location.protocol + "//" + window.location.host);
   }
+
+  useEffect(() => {}, [
+    document.addEventListener("keypress", (event) => {
+      if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        sendMessage(inputValue);
+      }
+    }),
+  ]);
 
   return (
     <>
@@ -80,7 +52,7 @@ export default function Home() {
             <React.Fragment key={index}>
               <p>
                 {`${userId} - 
-            ${userId === namespaceAdmin ? "(Admin)" : "(Guest)"} 
+            ${userId === namespaceAdmin ? "(Host)" : "(Client)"} 
             ${clientSocketid === userId ? "- You" : ""}`}
               </p>
             </React.Fragment>
@@ -95,12 +67,6 @@ export default function Home() {
           </Button>
         </div>
       </section>
-      <AdsenseBanner
-        data-ad-client={process.env.NEXT_PUBLIC_GOOGLE_ADS_CLIENT_ID}
-        data-ad-slot="4203866364"
-        data-ad-format="auto"
-        data-full-width-responsive="true"
-      />
     </>
   );
 }
