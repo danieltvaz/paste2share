@@ -18,7 +18,7 @@ export default function Home() {
   return (
     <section className="flex grow flex-col justify-center gap-4 items-center">
       <HomepageInfo />
-      <Button onClick={startNewConnection} variant="blue" style={{ width: "14rem" }}>
+      <Button onClick={startNewConnection} variant="blue" width="14rem">
         New paste
       </Button>
     </section>
