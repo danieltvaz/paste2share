@@ -51,6 +51,13 @@ export default function Home() {
     <>
       <section className="flex flex-col items-center gap-4 ">
         <TextArea onChange={handleChange} value={inputValue} />
+        <Button onClick={sendMessage} variant="blue" width="12rem">
+          Send
+        </Button>
+        <span className="text-sm text-gray-500">
+          Press <span className="font-bold">Enter</span> to send message,{" "}
+          <span className="font-bold">Shift + Enter</span> to add a new line
+        </span>
         <div className="flex flex-col text-center">
           <p className="font-bold">Connected users</p>
           {connectedUsers?.map((userId, index) => (
