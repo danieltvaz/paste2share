@@ -33,14 +33,19 @@ export default function Home() {
     router.replace(window.location.protocol + "//" + window.location.host);
   }
 
-  useEffect(() => {}, [
-    document.addEventListener("keypress", (event) => {
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
       if (event.key === "Enter" && !event.shiftKey) {
         event.preventDefault();
-        sendMessage(inputValue);
+        sendMessage();
       }
-    }),
-  ]);
+    };
+    document.addEventListener("keypress", handleKeyPress);
+
+    return () => {
+      document.removeEventListener("keypress", handleKeyPress);
+    };
+  }, [inputValue]);
 
   return (
     <>
