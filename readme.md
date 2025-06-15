@@ -1,4 +1,4 @@
-![image](./docs/main-interface.png)
+![image](./docs/main-interface.png) ![image](./docs/paste-interface.png)
 
 # Paste2Share 📋🔗
 
