@@ -18,7 +18,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head></head>
+      <head>
+        <link rel="shortcut icon" href="/public/images/logo.png" />
+      </head>
       <body>
         <Header />
         <main>{children}</main>
