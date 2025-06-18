@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
 import SocketHandler from "@/services/socket/socket";
-import { debounce } from "@/helpers/debounce";
 
 export default function useWebsocket() {
   const socketRef = useRef(new SocketHandler());

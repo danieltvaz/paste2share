@@ -6,7 +6,7 @@ import Button from "@/components/client/button";
 import React from "react";
 import TextArea from "@/components/client/text-area";
 import { useRouter as navigationRouter } from "next/navigation";
-import useWebsocket from "@/app/hooks/useWebsocket";
+import useWebsocket from "@/hooks/useWebsocket";
 
 export default function Home() {
   const router = navigationRouter();
