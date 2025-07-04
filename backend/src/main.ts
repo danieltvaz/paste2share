@@ -10,8 +10,10 @@ async function bootstrap() {
         ? 'https://paste2share.danieltostes.dev'
         : '*',
     methods: 'GET',
-    credentials: true,
   });
-  await app.listen(3001);
+
+  await app.listen(
+    `App listening on PORT 3001 for the environment ${process.env.NODE_ENV}`,
+  );
 }
 bootstrap();
