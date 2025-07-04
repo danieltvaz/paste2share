@@ -70,7 +70,7 @@ jobs:
             npm install --omit=dev
             cd dist
             pm2 restart ecosystem.config.js || pm2 start ecosystem.config.js
-            cd ..
+            cd ../..
 
             echo "===> Frontend deploy"
             mkdir -p frontend && tar xzf frontend-build.tar.gz -C frontend
