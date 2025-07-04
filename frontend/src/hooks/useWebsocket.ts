@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import SocketHandler from "@/services/socket/socket";
 
@@ -17,9 +17,9 @@ export default function useWebsocket() {
     }
   });
 
-  function sendMessage() {
+  const sendMessage = useCallback(() => {
     socketRef.current.socketInstance?.emit("message", { message: inputValue, namespaceId: namespaceId });
-  }
+  }, [inputValue, namespaceId]);
 
   function disconnect() {
     socketRef.current.disconnect();
