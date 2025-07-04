@@ -32,6 +32,7 @@ jobs:
           npm ci
           npm run build
           rm .env.production
+          cp ecosystem.config.js ./dist/ecosystem.config.js
 
       - name: Archive backend artifacts
         run: |
