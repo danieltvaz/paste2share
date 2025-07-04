@@ -59,7 +59,7 @@ export default function Home() {
             text: window.location.protocol + "//" + window.location.host + window.location.pathname,
           },
         });
-        console.log(qrcode);
+
         setQrcode(qrcode.data.qrcode);
       } catch (e: unknown) {
         console.error("Error fetching QR code:", (e as AxiosError).message);
