@@ -68,6 +68,7 @@ jobs:
             rm backend-build.tar.gz
             cd backend
             npm install --omit=dev
+            cd dist
             pm2 restart ecosystem.config.js || pm2 start ecosystem.config.js
             cd ..
 
