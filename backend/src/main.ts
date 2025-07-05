@@ -9,6 +9,7 @@ async function bootstrap() {
       process.env.NODE_ENV === 'production'
         ? 'https://paste2share.danieltostes.dev'
         : '*',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
   });
 
   await app.listen(3001);
