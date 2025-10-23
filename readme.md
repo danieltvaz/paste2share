@@ -5,9 +5,6 @@
 A real-time text sharing application to easily send and receive text across multiple people and devices.  
 Users can create a unique session and instantly share it with others using a simple, generated URL.
 
-This project is hosted on my personal AWS infrastructure:  
-https://paste2share.danieltostes.dev/
-
 ## ✨ Features
 
 - Real-time text synchronization across devices using WebSockets.
