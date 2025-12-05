@@ -4,8 +4,7 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-
-import { generateRandomId } from 'src/utils';
+import { generateRandomId } from '../utils';
 
 interface INewMessageBody {
   message: string;
