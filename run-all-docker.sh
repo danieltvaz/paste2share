@@ -19,7 +19,7 @@ else
 fi
 
 echo "Running backend container..."
-docker run -d --rm -it -p 3001:3001 -v "$(pwd)/backend:/app" paste2share-backend
+docker run -d --rm -it -p 3000:3000 -v "$(pwd)/backend:/app" paste2share-backend
 
 echo "Running frontend container..."
-docker run -d --rm -it -p 3000:3000 -v "$(pwd)/frontend:/app" paste2share-frontend
+docker run -d --rm -it -p 3001:3001 -v "$(pwd)/frontend:/app" paste2share-frontend
