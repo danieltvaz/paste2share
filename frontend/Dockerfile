@@ -6,7 +6,7 @@ RUN apk add --no-cache bash
 
 COPY ./package*.json ./
 
-RUN npm ci
+RUN npm install
 
 RUN npm install -g next
 
