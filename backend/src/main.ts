@@ -12,10 +12,10 @@ async function bootstrap() {
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
   });
 
-  await app.listen(3001);
+  await app.listen(process.env.PORT);
 
   console.log(
-    `App listening on PORT 3001 for the environment ${process.env.NODE_ENV}`,
+    `App listening on PORT ${process.env.PORT} for the environment ${process.env.NODE_ENV}`,
   );
 }
 bootstrap();
