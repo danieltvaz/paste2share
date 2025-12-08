@@ -2,8 +2,6 @@
 RUNNER=$1
 ENVIRONMENT=$2
 
-
-
 if [ "$RUNNER" == "docker" ] || [ "$RUNNER" == "podman" ]; then
   echo "Runner is valid: $RUNNER"
 else
@@ -25,18 +23,26 @@ image_exists() {
   $RUNNER image inspect "$1" > /dev/null 2>&1
 }
 
-if image_exists $FRONTEND_IMAGE_NAME; then
-  echo "Image $FRONTEND_IMAGE_NAME already exists."
-else
-  echo "Building $FRONTEND_IMAGE_NAME image..."
-  $RUNNER build -t $FRONTEND_IMAGE_NAME -f frontend/Dockerfile.$ENVIRONMENT ./frontend
-fi
+if [ "$ENVIRONMENT" == "production" ]; then
+  echo "Building $BACKEND_IMAGE_NAME image (production - forced rebuild)..."
+  $RUNNER build --no-cache -t $BACKEND_IMAGE_NAME -f backend/Dockerfile.$ENVIRONMENT ./backend
 
-if image_exists $BACKEND_IMAGE_NAME; then
-  echo "Image $BACKEND_IMAGE_NAME already exists."
+  echo "Building $FRONTEND_IMAGE_NAME image (production - forced rebuild)..."
+  $RUNNER build --no-cache -t $FRONTEND_IMAGE_NAME -f frontend/Dockerfile.$ENVIRONMENT ./frontend
 else
-  echo "Building $BACKEND_IMAGE_NAME image..."
-  $RUNNER build -t $BACKEND_IMAGE_NAME -f backend/Dockerfile.$ENVIRONMENT ./backend
+  if image_exists $FRONTEND_IMAGE_NAME; then
+    echo "Image $FRONTEND_IMAGE_NAME already exists."
+  else
+    echo "Building $FRONTEND_IMAGE_NAME image..."
+    $RUNNER build -t $FRONTEND_IMAGE_NAME -f frontend/Dockerfile.$ENVIRONMENT ./frontend
+  fi
+
+  if image_exists $BACKEND_IMAGE_NAME; then
+    echo "Image $BACKEND_IMAGE_NAME already exists."
+  else
+    echo "Building $BACKEND_IMAGE_NAME image..."
+    $RUNNER build -t $BACKEND_IMAGE_NAME -f backend/Dockerfile.$ENVIRONMENT ./backend
+  fi
 fi
 
 if [ "$ENVIRONMENT" == "development" ]; then
@@ -47,7 +53,6 @@ else
   FRONTEND_VOLUME=""
 fi
 
-# Rodar containers
 echo "Running backend container..."
 $RUNNER run -d -it -p 3000:3000 --name $BACKEND_IMAGE_NAME $BACKEND_VOLUME $BACKEND_IMAGE_NAME
 

@@ -14,34 +14,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: "20"
-
-      - name: Install and build backend
-        working-directory: ./backend
-        run: |
-          npm ci
-          npm run build
-          cp ecosystem.config.js ./dist/ecosystem.config.js
-
-      - name: Build frontend with environment variables
-        working-directory: ./frontend
-        run: |
-          echo "NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL }}" > .env.production
-          npm ci
-          npm run build
-          rm .env.production
-
-      - name: Archive backend artifacts
-        run: |
-          tar czf backend-build.tar.gz -C backend dist package.json package-lock.json
-
-      - name: Archive frontend artifacts
-        run: |
-          tar czf frontend-build.tar.gz -C frontend .next public package.json package-lock.json next.config.mjs
-
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
@@ -49,34 +21,25 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Copy backend build to EC2
+      - name: Copy repository to EC2
         run: |
-          scp backend-build.tar.gz ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/paste2share/
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            cd ${{ vars.APP_PATH}}
+            git fetch origin
+            git reset --hard origin/main
+          EOF
 
-      - name: Copy frontend build to EC2
+      - name: Build and deploy with Docker on EC2
         run: |
-          scp frontend-build.tar.gz ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/paste2share/
-
-      - name: Deploy on EC2 and restart services
-        run: |
-          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << EOF
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
             set -e
-            cd ~/paste2share
+            cd ${{ vars.APP_PATH }}
 
-            echo "===> Backend deploy"
-            mkdir -p backend && tar xzf backend-build.tar.gz -C backend
-            rm backend-build.tar.gz
-            cd backend
-            npm install --omit=dev
-            cd dist
-            pm2 restart ecosystem.config.js || pm2 start ecosystem.config.js
-            cd ../..
+            echo "===> Building and starting containers with run.sh"
+            ./run.sh docker production
 
-            echo "===> Frontend deploy"
-            mkdir -p frontend && tar xzf frontend-build.tar.gz -C frontend
-            rm frontend-build.tar.gz
-            cd frontend
-            npm install --omit=dev
+            echo "===> Cleaning up old images"
+            docker image prune -f
 
-            pm2 restart paste2share-frontend || pm2 start "npm start" --name paste2share-frontend
+            echo "===> Deploy completed successfully!"
           EOF
