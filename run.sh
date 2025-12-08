@@ -24,6 +24,14 @@ image_exists() {
 }
 
 if [ "$ENVIRONMENT" == "production" ]; then
+  $RUNNER stop $BACKEND_IMAGE_NAME 2>/dev/null || true
+  $RUNNER rm $BACKEND_IMAGE_NAME 2>/dev/null || true
+  $RUNNER stop $FRONTEND_IMAGE_NAME 2>/dev/null || true
+  $RUNNER rm $FRONTEND_IMAGE_NAME 2>/dev/null || true
+
+  echo "Limpando imagens, containers e volumes não utilizados..."
+  $RUNNER system prune -af --volumes
+
   echo "Building $BACKEND_IMAGE_NAME image (production - forced rebuild)..."
   $RUNNER build --no-cache -t $BACKEND_IMAGE_NAME -f backend/Dockerfile.$ENVIRONMENT ./backend
 
@@ -53,13 +61,9 @@ else
   FRONTEND_VOLUME=""
 fi
 
-$RUNNER stop $BACKEND_IMAGE_NAME 2>/dev/null || true
-$RUNNER rm $BACKEND_IMAGE_NAME 2>/dev/null || true
-$RUNNER stop $FRONTEND_IMAGE_NAME 2>/dev/null || true
-$RUNNER rm $FRONTEND_IMAGE_NAME 2>/dev/null || true
-
 echo "Running backend container..."
 $RUNNER run -d -it -p 3000:3000 --name $BACKEND_IMAGE_NAME $BACKEND_VOLUME $BACKEND_IMAGE_NAME
 
 echo "Running frontend container..."
 $RUNNER run -d -it -p 3001:3001 --name $FRONTEND_IMAGE_NAME $FRONTEND_VOLUME $FRONTEND_IMAGE_NAME
+
