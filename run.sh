@@ -53,6 +53,11 @@ else
   FRONTEND_VOLUME=""
 fi
 
+$RUNNER stop $BACKEND_IMAGE_NAME 2>/dev/null || true
+$RUNNER rm $BACKEND_IMAGE_NAME 2>/dev/null || true
+$RUNNER stop $FRONTEND_IMAGE_NAME 2>/dev/null || true
+$RUNNER rm $FRONTEND_IMAGE_NAME 2>/dev/null || true
+
 echo "Running backend container..."
 $RUNNER run -d -it -p 3000:3000 --name $BACKEND_IMAGE_NAME $BACKEND_VOLUME $BACKEND_IMAGE_NAME
 
