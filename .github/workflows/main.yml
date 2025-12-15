@@ -31,9 +31,13 @@ jobs:
 
       - name: Build and deploy with Docker on EC2
         run: |
-          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << EOF
             set -e
             cd ${{ vars.APP_PATH }}
+
+            export NEXT_PUBLIC_API_URL="${{ vars.NEXT_PUBLIC_API_URL }}"
+
+            echo "NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL"
 
             echo "===> Building and starting containers with run.sh"
             ./run.sh docker production
