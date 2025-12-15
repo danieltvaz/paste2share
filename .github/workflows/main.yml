@@ -30,6 +30,10 @@ jobs:
           EOF
 
       - name: Build and deploy with Docker on EC2
+        env:
+          NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL }}
+          NODE_ENV: ${{ vars.NODE_ENV }}
+          PORT: ${{ vars.PORT }}
         run: |
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << EOF
             set -e
@@ -39,6 +43,10 @@ jobs:
             export NEXT_PUBLIC_API_URL="${NEXT_PUBLIC_API_URL}"
             export NODE_ENV="${NODE_ENV}"
             export PORT="${PORT}"
+
+            echo "NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL"
+            echo "NODE_ENV=$NODE_ENV"
+            echo "PORT=$PORT"
 
             echo "===> Building and starting containers with run.sh"
             ./run.sh docker production
