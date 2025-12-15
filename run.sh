@@ -89,6 +89,8 @@ echo "===> Running backend container..."
 $RUNNER run -d \
   -p 3000:3000 \
   --name $BACKEND_IMAGE_NAME \
+  -e NODE_ENV=production \
+  -e PORT=3000 \
   $BACKEND_VOLUME \
   $BACKEND_IMAGE_NAME
 
